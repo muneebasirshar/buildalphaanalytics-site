@@ -215,7 +215,18 @@ section {
 .media-scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(18,22,28,0.72) 0%, rgba(18,22,28,0.5) 45%, rgba(18,22,28,0.85) 100%); }
 .section-webgl { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 
+.bg-plate { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 70% 50%; transform: scale(1.1); will-change: transform; }
 .why { min-height: 100vh; align-items: flex-end; padding-bottom: clamp(5rem, 12vh, 9rem); }
+/* dark where the copy sits (left), open over the dashboard (right) so its labels stay readable */
+.why .media-scrim {
+  background:
+    linear-gradient(90deg, rgba(18,22,28,0.94) 0%, rgba(18,22,28,0.72) 38%, rgba(18,22,28,0.22) 70%, rgba(18,22,28,0.12) 100%),
+    linear-gradient(180deg, rgba(18,22,28,0.55) 0%, transparent 22%, transparent 72%, rgba(18,22,28,0.85) 100%);
+}
+@media (max-width: 780px) {
+  /* copy spans the full width on phones: keep the dashboard clear on top, darken under the text */
+  .why .media-scrim { background: linear-gradient(180deg, rgba(18,22,28,0.45) 0%, rgba(18,22,28,0.3) 30%, rgba(18,22,28,0.9) 52%, rgba(18,22,28,0.97) 100%); }
+}
 .why-content { position: relative; z-index: 2; max-width: 760px; margin-right: auto; text-shadow: 0 2px 20px rgba(18,22,28,0.7); }
 .why-content p { margin-top: 1.4rem; color: var(--text-dim); font-size: clamp(1rem, 1.4vw, 1.12rem); }
 

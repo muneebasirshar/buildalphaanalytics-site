@@ -56,6 +56,20 @@ if (hero && heroContent) {
   updateHeroCopy();
 }
 
+/* ---- "why" section: dashboard plate drifts slower than the page ---- */
+const whySection = document.getElementById("why");
+const whyPlate = whySection && whySection.querySelector(".bg-plate");
+if (whyPlate && !reduceMotion) {
+  const drift = () => {
+    const r = whySection.getBoundingClientRect();
+    const p = clamp01((window.innerHeight - r.top) / (r.height + window.innerHeight));
+    whyPlate.style.transform = `translate3d(0, ${((p - 0.5) * -60).toFixed(1)}px, 0) scale(1.1)`;
+  };
+  window.addEventListener("scroll", drift, { passive: true });
+  window.addEventListener("resize", drift);
+  drift();
+}
+
 /* ---- header: solid once the hero scrolls away ---- */
 const header = document.querySelector(".site-header");
 if (header) {

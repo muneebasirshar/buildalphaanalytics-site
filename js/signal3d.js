@@ -62,15 +62,15 @@ function init() {
   const pastCurve = new THREE.CatmullRomCurve3(pts.slice(0, TODAY + 1));
   const futureCurve = new THREE.CatmullRomCurve3(pts.slice(TODAY));
 
-  const pastGeo = new THREE.TubeGeometry(pastCurve, 140, 0.035, 8, false);
-  const past = new THREE.Mesh(pastGeo, new THREE.MeshBasicMaterial({ color: PAPER, transparent: true, opacity: 0.85 }));
+  const pastGeo = new THREE.TubeGeometry(pastCurve, 140, 0.02, 8, false);
+  const past = new THREE.Mesh(pastGeo, new THREE.MeshBasicMaterial({ color: PAPER, transparent: true, opacity: 0.5 }));
   scene.add(past);
 
-  const futGeo = new THREE.TubeGeometry(futureCurve, 120, 0.05, 8, false);
+  const futGeo = new THREE.TubeGeometry(futureCurve, 120, 0.03, 8, false);
   const future = new THREE.Mesh(futGeo, new THREE.MeshBasicMaterial({ color: AMBER, transparent: true, opacity: 1 }));
   scene.add(future);
-  const haloGeo = new THREE.TubeGeometry(futureCurve, 120, 0.16, 8, false);
-  const halo = new THREE.Mesh(haloGeo, new THREE.MeshBasicMaterial({ color: AMBER, transparent: true, opacity: 0.14, blending: THREE.AdditiveBlending, depthWrite: false }));
+  const haloGeo = new THREE.TubeGeometry(futureCurve, 120, 0.1, 8, false);
+  const halo = new THREE.Mesh(haloGeo, new THREE.MeshBasicMaterial({ color: AMBER, transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending, depthWrite: false }));
   scene.add(halo);
 
   // sample dots on the past line
@@ -78,45 +78,13 @@ function init() {
   for (let i = 0; i <= TODAY; i++) { dotPos[i * 3] = pts[i].x; dotPos[i * 3 + 1] = pts[i].y; dotPos[i * 3 + 2] = 0; }
   const dotGeo = new THREE.BufferGeometry();
   dotGeo.setAttribute("position", new THREE.BufferAttribute(dotPos, 3));
-  const dots = new THREE.Points(dotGeo, new THREE.PointsMaterial({ color: PAPER, size: 0.09, transparent: true, opacity: 0.9, depthWrite: false }));
+  const dots = new THREE.Points(dotGeo, new THREE.PointsMaterial({ color: PAPER, size: 0.06, transparent: true, opacity: 0.55, depthWrite: false }));
   scene.add(dots);
-
-  // "today" marker
-  const todayX = pts[TODAY].x;
-  const marker = new THREE.Mesh(new THREE.BoxGeometry(0.015, 2.8, 0.015), new THREE.MeshBasicMaterial({ color: PAPER, transparent: true, opacity: 0.35 }));
-  marker.position.set(todayX, 3.1, 0);
-  scene.add(marker);
-  const markerBase = new THREE.Mesh(new THREE.RingGeometry(0.12, 0.16, 32), new THREE.MeshBasicMaterial({ color: AMBER, transparent: true, opacity: 0.6, side: THREE.DoubleSide }));
-  markerBase.rotation.x = -Math.PI / 2;
-  markerBase.position.set(todayX, -0.44, 0);
-  scene.add(markerBase);
 
   // glowing head of the forecast line
   const head = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture(), transparent: true, opacity: 0.9, depthWrite: false, blending: THREE.AdditiveBlending }));
   head.scale.set(1.1, 1.1, 1);
   scene.add(head);
-
-  // floating KPI cards at different depths
-  const cards = [];
-  const cardSpecs = [
-    { pos: [-4.6, 2.9, -2.4], w: 1.8, h: 1.0, fill: 0.62, pulse: false },
-    { pos: [2.2, 3.4, -4.2], w: 2.0, h: 1.1, fill: 0.78, pulse: true },
-    { pos: [6.4, 1.6, -1.6], w: 1.6, h: 0.9, fill: 0.45, pulse: false },
-  ];
-  for (const spec of cardSpecs) {
-    const g = new THREE.Group();
-    const plane = new THREE.Mesh(new THREE.PlaneGeometry(spec.w, spec.h), new THREE.MeshBasicMaterial({ color: PAPER, transparent: true, opacity: 0.05, depthWrite: false }));
-    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(plane.geometry), new THREE.LineBasicMaterial({ color: AMBER, transparent: true, opacity: 0.45 }));
-    const bar = new THREE.Mesh(new THREE.PlaneGeometry(spec.w * 0.8 * spec.fill, 0.05), new THREE.MeshBasicMaterial({ color: AMBER, transparent: true, opacity: 0.9 }));
-    bar.position.set(-spec.w * 0.4 + (spec.w * 0.8 * spec.fill) / 2, -spec.h * 0.28, 0.01);
-    const label = new THREE.Mesh(new THREE.PlaneGeometry(spec.w * 0.45, 0.04), new THREE.MeshBasicMaterial({ color: PAPER, transparent: true, opacity: 0.5 }));
-    label.position.set(-spec.w * 0.4 + spec.w * 0.225, spec.h * 0.28, 0.01);
-    g.add(plane, edges, bar, label);
-    g.position.set(...spec.pos);
-    g.rotation.y = -0.25;
-    scene.add(g);
-    cards.push({ g, plane, spec });
-  }
 
   const pastIndex = pastGeo.index.count, futIndex = futGeo.index.count, haloIndex = haloGeo.index.count;
   let progress = 0, time = 0, last = performance.now(), looping = false;
@@ -147,14 +115,6 @@ function init() {
     head.position.copy(headPt);
     head.material.opacity = fFut > 0.01 ? 0.75 + 0.25 * Math.sin(time * 4) : 0;
     head.scale.setScalar(1 + 0.15 * Math.sin(time * 3));
-
-    marker.material.opacity = 0.35 * smoothstep(0.25, 0.4, progress);
-    markerBase.material.opacity = 0.6 * smoothstep(0.25, 0.4, progress);
-
-    for (const c of cards) {
-      c.g.position.y = c.spec.pos[1] + Math.sin(time * 0.6 + c.spec.pos[0]) * 0.08;
-      c.plane.material.opacity = c.spec.pulse ? 0.05 + 0.22 * Math.max(0, Math.sin(time * 1.4)) : 0.05;
-    }
 
     mouse.x += (mouse.tx - mouse.x) * 0.05;
     mouse.y += (mouse.ty - mouse.y) * 0.05;
