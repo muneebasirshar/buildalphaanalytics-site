@@ -402,6 +402,17 @@ section {
   transition: border-color 0.3s;
 }
 .enquiry input:focus, .enquiry textarea:focus { border-color: var(--accent); }
+/* keep browser autofill on the dark form instead of light-blue bars */
+.enquiry input:-webkit-autofill,
+.enquiry input:-webkit-autofill:hover,
+.enquiry input:-webkit-autofill:focus,
+.enquiry textarea:-webkit-autofill {
+  -webkit-text-fill-color: var(--text);
+  -webkit-box-shadow: 0 0 0 1000px #15191f inset;
+  box-shadow: 0 0 0 1000px #15191f inset;
+  caret-color: var(--text);
+  transition: background-color 9999s ease-out 0s;
+}
 .enquiry .cta { justify-self: start; }
 .enquiry .cta:disabled { opacity: 0.6; cursor: progress; transform: none; box-shadow: none; }
 .enquiry input.is-invalid, .enquiry textarea.is-invalid { border-color: #e0836b; }

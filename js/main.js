@@ -165,7 +165,11 @@ if (form && note) {
     })
       .then((r) => r.json().then((body) => ({ ok: r.ok, body })))
       .then((res) => {
-        if (!res.ok || String(res.body.success) !== "true") throw new Error("send failed");
+        if (!res.ok || String(res.body.success) !== "true") {
+          // FormSubmit explains failures (e.g. "This form needs Activation") in body.message
+          console.warn("FormSubmit did not accept the enquiry:", res.body && res.body.message);
+          throw new Error("send failed");
+        }
         form.reset();
         setNote(`Thank you. Your enquiry has been sent, and we will reply to ${payload.email} soon.`);
       })
